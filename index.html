@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>السيرة الذاتية | زياد سمير محمد حسن</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <style>
+    /* Global Styles */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #f0f0f0; /* تغيير لون الخلفية */
+      color: #333; /* لون النصوص الأساسي */
+      text-align: right;
+      transition: all 0.3s ease;
+    }
+    body[lang="en"], body[lang="de"] {
+      font-family: 'Roboto', sans-serif;
+      text-align: left;
+    }
+    a { text-decoration: none; color: #4CAF50; } /* لون الروابط */
+    ul { list-style: none; }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background-color: transparent;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      z-index: 999;
+      transition: background-color 0.3s ease;
+    }
+    .navbar.scrolled {
+      background-color: #4CAF50; /* لون الشريط عند التمرير */
+    }
+    .navbar .logo {
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .nav-links li a {
+      color: #fff;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      transition: color 0.3s ease;
+    }
+    .nav-links li a:hover {
+      color: #4CAF50; /* لون الروابط عند التمرير */
+    }
+    .menu-icon {
+      display: none;
+      font-size: 1.7rem;
+      color: #fff;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      .nav-links {
+        position: absolute;
+        top: 60px;
+        right: 0;
+        background-color: #4CAF50; /* لون الشريط المنسدل */
+        flex-direction: column;
+        width: 200px;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        padding: 1rem;
+      }
+      .nav-links.show {
+        transform: translateX(0%);
+      }
+      .menu-icon {
+        display: block;
+      }
+    }
+
+    /* Language Switcher */
+    .lang-switcher {
+      position: fixed;
+      top: 70px;
+      right: 20px;
+      z-index: 1000;
+    }
+    .lang-switcher select {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    /* Header */
+    .header-section {
+      position: relative;
+      height: 100vh;
+      background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1557683316-973673baf926') center/cover no-repeat fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #fff;
+      margin-top: 60px;
+    }
+    .header-content {
+      z-index: 2;
+      max-width: 600px;
+      padding: 0 1rem;
+    }
+    .header-content h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .header-content p {
+      font-size: 1.2rem;
+      margin-bottom: 1.5rem;
+    }
+    .header-content button {
+      background-color: #4CAF50; /* لون الزر */
+      color: #fff;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      border-radius: 25px;
+    }
+    .header-content button:hover {
+      background-color: #45a049; /* لون الزر عند التمرير */
+      transform: scale(1.05);
+    }
+    @media (max-width: 480px) {
+      .header-content h1 { font-size: 1.8rem; }
+      .header-content p { font-size: 1rem; }
+      .header-content button { padding: 0.6rem 1.2rem; font-size: 0.9rem; }
+    }
+
+    /* Sections */
+    .section {
+      max-width: 1200px;
+      margin: 3rem auto;
+      padding: 2rem;
+      background: #ffffff; /* لون خلفية الأقسام */
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 1s ease;
+    }
+    .section.fade-in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .section h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #000; /* لون النصوص في الأقسام */
+      position: relative;
+    }
+    .section h2::after {
+      content: "";
+      display: block;
+      width: 60px;
+      height: 3px;
+      background-color: #4CAF50; /* لون الخط تحت العناوين */
+      margin: 0.5rem auto;
+    }
+
+    /* About */
+    .about-container {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 2rem;
+      align-items: center;
+    }
+    .about-container img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .info-container p {
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+    .interactive-btn {
+      background-color: #4CAF50; /* لون الزر */
+      color: #fff;
+      border: none;
+      padding: 0.7rem 1.5rem;
+      cursor: pointer;
+      border-radius: 25px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    .interactive-btn:hover {
+      background-color: #45a049; /* لون الزر عند التمرير */
+      transform: scale(1.05);
+    }
+    .hidden-info {
+      padding: 1rem;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-top: 1rem;
+    }
+    .hidden-info .inner {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease, opacity 0.5s ease;
+    }
+    .hidden-info.show .inner {
+      max-height: 1000px;
+      opacity: 1;
+    }
+    @media (max-width: 768px) {
+      .about-container {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .about-container img { margin: 0 auto; }
+    }
+
+    /* Education */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .timeline-item {
+      background-color: #fff;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: relative;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .timeline-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    .timeline-item::before {
+      content: "";
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 5px;
+      height: 100%;
+      background-color: #4CAF50; /* لون الشريط الجانبي */
+    }
+    .timeline-item h3 {
+      font-size: 1.3rem;
+      color: #000; /* لون النصوص */
+    }
+    .timeline-item p {
+      margin: 0.5rem 0;
+    }
+
+    /* Contact Section */
+    .contact-section {
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .contact-info p {
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+    .contact-info a:hover {
+      color: #4CAF50; /* لون الروابط عند التمرير */
+      text-decoration: underline;
+    }
+
+    /* Video Section */
+    .video-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+    .video-container {
+      flex: 1 1 300px;
+      max-width: 560px;
+      transition: transform 0.3s ease;
+    }
+    .video-container:hover {
+      transform: translateY(-5px);
+    }
+    .video-container iframe {
+      width: 100%;
+      height: 315px;
+      border-radius: 8px;
+    }
+    @media (max-width: 480px) {
+      .video-container iframe { height: 200px; }
+    }
+
+    /* Flags Section */
+    .flags-section {
+      margin: 3rem auto;
+      text-align: center;
+      max-width: 1200px;
+      padding: 2rem;
+      background: #ffffff; /* لون خلفية القسم */
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .flags-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+    }
+    .flags-container img {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border: 2px solid #fff;
+      border-radius: 5px;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .flags-container img:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Footer */
+    .footer {
+      background-color: #4CAF50; /* لون الفوتر */
+      color: #fff;
+      text-align: center;
+      padding: 2rem;
+      font-size: 1rem;
+    }
+    #backToTop {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background-color: #4CAF50; /* لون زر العودة للأعلى */
+      color: #fff;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: none;
+      transition: background-color 0.3s ease;
+    }
+    #backToTop:hover {
+      background-color: #45a049;
+    }
+
+    /* Floating LinkedIn Icon */
+    .floating-linkedin {
+      position: fixed;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background-color: #0077b5;
+      padding: 12px;
+      border-radius: 50%;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+      z-index: 10000;
+    }
+    .floating-linkedin:hover {
+      transform: translateY(-50%) scale(1.1);
+    }
+    .floating-linkedin i {
+      color: #fff;
+      font-size: 24px;
+    }
+
+    /* Media Queries for Responsiveness */
+    @media (max-width: 768px) {
+      .section {
+        padding: 1rem;
+      }
+    }
+    @media (max-width: 480px) {
+      .floating-linkedin {
+        right: 10px;
+        padding: 8px;
+      }
+      .floating-linkedin i {
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo">Zeyad Samir</div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#about">عنّي</a></li>
+      <li><a href="#education">التعليم</a></li>
+      <li><a href="#contact">تواصل</a></li>
+      <li><a href="#video">فيديو</a></li>
+    </ul>
+    <div class="menu-icon" id="menuIcon">☰</div>
+  </nav>
+
+  <!-- Language Switcher -->
+  <div class="lang-switcher">
+    <select id="languageSelect" onchange="changeLanguage()">
+      <option value="ar">العربية</option>
+      <option value="en">English</option>
+      <option value="de">Deutsch</option>
+    </select>
+  </div>
+
+  <!-- Header with Animated Name -->
+  <header class="header-section">
+    <div class="header-content animate__animated animate__fadeIn">
+      <h1 class="typing" id="typing"></h1>
+      <p id="header-p">طالب بكلية طب الأسنان - جامعة سيناء</p>
+      <button onclick="scrollToSection('contact')">تواصل معي</button>
+    </div>
+  </header>
+
+  <!-- About Section -->
+  <section id="about" class="section animate__animated">
+    <h2 id="aboutTitle">عنّي</h2>
+    <div class="about-container">
+      <img src="https://images.unsplash.com/photo-1531259683007-016a7b628fc3" alt="Joker">
+      <div class="info-container">
+        <p id="name">الاسم: زياد سمير محمد حسن</p>
+        <p id="dob">تاريخ الميلاد: 28 يوليو 2005</p>
+        <p id="position">المسمى: طالب بكلية طب الأسنان - جامعة سيناء</p>
+        <p id="location">الموقع: الزقازيق، محافظة الشرقية، مصر</p>
+        <button id="moreBtn" class="interactive-btn">عرض المزيد</button>
+        <div id="moreInfo" class="hidden-info">
+          <div class="inner">
+            <p id="additionalInfo">أسعى للتعلم والتطوير المستمر في مجال طب الأسنان. أهوى البرمجة والتقنية.</p>
+            <p id="riyadh">قضيت عامين في المملكة العربية السعودية.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Education Section -->
+  <section id="education" class="section animate__animated">
+    <h2 id="educationTitle">التعليم</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <h3 id="university">كلية طب الأسنان - جامعة سيناء</h3>
+        <span class="date" id="universityDate">2023 - حتى الآن</span>
+        <p id="universityDesc">طالب بكلية طب الأسنان، أسعى للتميز الأكاديمي.</p>
+      </div>
+      <div class="timeline-item">
+        <h3 id="highSchool">مدرسة النجاح الثانوية بنين - الزقازيق</h3>
+        <span class="date" id="highSchoolDate">2020 - 2023</span>
+        <p id="highSchoolDesc">درست المرحلة الثانوية.</p>
+      </div>
+      <div class="timeline-item">
+        <h3 id="sekem">مدرسة سيكم - بلبيس</h3>
+        <p id="sekemDesc">درست مراحل الحضانة والابتدائية والإعدادية.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section id="contact" class="section contact-section animate__animated">
+    <h2 id="contactTitle">تواصل معي</h2>
+    <div class="contact-info">
+      <p><strong id="phoneLabel">رقم الهاتف:</strong> <a href="tel:+201070675814">+201070675814</a></p>
+      <p><strong id="emailLabel">البريد الإلكتروني:</strong> <a href="mailto:zeyadsamir2029@gmail.com">zeyadsamir2029@gmail.com</a></p>
+      <p id="address"><strong id="addressLabel">العنوان:</strong> الزقازيق، محافظة الشرقية، مصر</p>
+    </div>
+  </section>
+
+  <!-- Video Section -->
+  <section id="video" class="section video-section animate__animated">
+    <h2 id="videoTitle">فيديو</h2>
+    <div class="video-row">
+      <div class="video-container">
+        <iframe src="https://www.youtube.com/embed/QeHW0w_6YVc" frameborder="0" allowfullscreen></iframe>
+      </div>
+      <div class="video-container">
+        <iframe src="https://www.youtube.com/embed/VBPKNU1b8zg" frameborder="0" allowfullscreen></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- Flags Section -->
+  <section id="flags" class="flags-section animate__animated">
+    <h2 id="flagsTitle">الدول التي أطمح لزيارتها</h2>
+    <div class="flags-container">
+      <a href="https://en.wikipedia.org/wiki/United_States" target="_blank">
+        <img src="https://flagcdn.com/160x120/us.png" alt="USA">
+      </a>
+      <a href="https://en.wikipedia.org/wiki/United_Arab_Emirates" target="_blank">
+        <img src="https://flagcdn.com/160x120/ae.png" alt="UAE">
+      </a>
+      <a href="https://en.wikipedia.org/wiki/Germany" target="_blank">
+        <img src="https://flagcdn.com/160x120/de.png" alt="Germany">
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p id="footerText">© 2025 جميع الحقوق محفوظة | زياد سمير محمد حسن</p>
+  </footer>
+
+  <!-- Back to Top -->
+  <button id="backToTop" title="العودة للأعلى">↑</button>
+
+  <!-- Floating LinkedIn Icon -->
+  <a href="https://www.linkedin.com/in/zeyad-samir-972839319" target="_blank" class="floating-linkedin">
+    <i class="fab fa-linkedin"></i>
+  </a>
+
+  <!-- JavaScript -->
+  <script>
+    let typeTimeout, eraseTimeout;
+    let currentLang = 'ar';
+    let texts = {
+      ar: ["مرحباً، أنا زياد سمير محمد حسن", "طالب بكلية طب الأسنان - جامعة سيناء"],
+      en: ["Hello, I am Zeyad Samir Mohamed Hassan", "Dental Student - Sinai University"],
+      de: ["Hallo, ich bin Zeyad Samir Mohamed Hassan", "Zahnmedizinstudent - Sinai-Universität"]
+    };
+    let currentTextIndex = 0;
+    let currentCharIndex = 0;
+    const typingElement = document.getElementById("typing");
+    const typingSpeed = 80;
+    const erasingSpeed = 50;
+    const delayBetweenTexts = 1500;
+
+    function type() {
+      if (currentCharIndex < texts[currentLang][currentTextIndex].length) {
+        typingElement.textContent += texts[currentLang][currentTextIndex].charAt(currentCharIndex);
+        currentCharIndex++;
+        typeTimeout = setTimeout(type, typingSpeed);
+      } else {
+        eraseTimeout = setTimeout(erase, delayBetweenTexts);
+      }
+    }
+    function erase() {
+      if (currentCharIndex > 0) {
+        typingElement.textContent = texts[currentLang][currentTextIndex].substring(0, currentCharIndex - 1);
+        currentCharIndex--;
+        eraseTimeout = setTimeout(erase, erasingSpeed);
+      } else {
+        currentTextIndex = (currentTextIndex + 1) % texts[currentLang].length;
+        typeTimeout = setTimeout(type, typingSpeed);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      currentTextIndex = 0;
+      currentCharIndex = 0;
+      setTimeout(type, 500);
+    });
+
+    const translations = {
+      ar: {
+        about: "عنّي",
+        education: "التعليم",
+        contact: "تواصل",
+        video: "فيديو",
+        name: "الاسم: زياد سمير محمد حسن",
+        dob: "تاريخ الميلاد: 28 يوليو 2005",
+        position: "المسمى: طالب بكلية طب الأسنان - جامعة سيناء",
+        location: "الموقع: الزقازيق، محافظة الشرقية، مصر",
+        zagazig: "الزقازيق",
+        sharqia: "محافظة الشرقية",
+        moreBtn: "عرض المزيد",
+        hideBtn: "إخفاء التفاصيل",
+        additionalInfo: "أسعى للتعلم والتطوير المستمر في مجال طب الأسنان. أهوى البرمجة والتقنية.",
+        riyadh: "قضيت عامين في المملكة العربية السعودية.",
+        flagsTitle: "الدول التي أطمح لزيارتها",
+        headerP: "طالب بكلية طب الأسنان - جامعة سيناء",
+        contactBtn: "تواصل معي",
+        backToTop: "العودة للأعلى",
+        footer: "© 2025 جميع الحقوق محفوظة | زياد سمير محمد حسن",
+        university: "كلية طب الأسنان - جامعة سيناء",
+        universityDate: "2023 - حتى الآن",
+        universityDesc: "طالب بكلية طب الأسنان، أسعى للتميز الأكاديمي.",
+        highSchool: "مدرسة النجاح الثانوية بنين - الزقازيق",
+        highSchoolDate: "2020 - 2023",
+        highSchoolDesc: "درست المرحلة الثانوية.",
+        sekem: "مدرسة سيكم - بلبيس",
+        sekemDesc: "درست مراحل الحضانة والابتدائية والإعدادية.",
+        phoneLabel: "رقم الهاتف:",
+        emailLabel: "البريد الإلكتروني:",
+        addressLabel: "العنوان:"
+      },
+      en: {
+        about: "About Me",
+        education: "Education",
+        contact: "Contact",
+        video: "Video",
+        name: "Name: Zeyad Samir Mohamed Hassan",
+        dob: "Date of Birth: July 28, 2005",
+        position: "Position: Dental Student - Sinai University",
+        location: "Location: Zagazig, Sharqia Governorate, Egypt",
+        zagazig: "Zagazig",
+        sharqia: "Sharqia Governorate",
+        moreBtn: "Show More",
+        hideBtn: "Hide Details",
+        additionalInfo: "I strive for continuous learning and development in dentistry. I am passionate about programming and technology.",
+        riyadh: "I spent two years in Saudi Arabia.",
+        flagsTitle: "Countries I Aspire to Visit",
+        headerP: "Dental Student - Sinai University",
+        contactBtn: "Contact Me",
+        backToTop: "Back to Top",
+        footer: "© 2025 All Rights Reserved | Zeyad Samir Mohamed Hassan",
+        university: "Faculty of Dentistry - Sinai University",
+        universityDate: "2023 - Present",
+        universityDesc: "Dental student aiming for academic excellence.",
+        highSchool: "Al-Najah Secondary School for Boys - Zagazig",
+        highSchoolDate: "2020 - 2023",
+        highSchoolDesc: "Completed secondary education.",
+        sekem: "Sekem School - Belbeis",
+        sekemDesc: "Studied kindergarten, primary, and preparatory stages.",
+        phoneLabel: "Phone Number:",
+        emailLabel: "Email:",
+        addressLabel: "Address:"
+      },
+      de: {
+        about: "Über mich",
+        education: "Bildung",
+        contact: "Kontakt",
+        video: "Video",
+        name: "Name: Zeyad Samir Mohamed Hassan",
+        dob: "Geburtsdatum: 28. Juli 2005",
+        position: "Position: Zahnmedizinstudent - Sinai-Universität",
+        location: "Standort: Zagazig, Gouvernement Sharqia, Ägypten",
+        zagazig: "Zagazig",
+        sharqia: "Gouvernement Sharqia",
+        moreBtn: "Mehr anzeigen",
+        hideBtn: "Details ausblenden",
+        additionalInfo: "Ich strebe nach kontinuierlichem Lernen und Entwicklung in der Zahnmedizin. Ich interessiere mich für Programmierung und Technologie.",
+        riyadh: "Ich habe zwei Jahre in Saudi-Arabien verbracht.",
+        flagsTitle: "Länder, die ich besuchen möchte",
+        headerP: "Zahnmedizinstudent - Sinai-Universität",
+        contactBtn: "Kontaktiere mich",
+        backToTop: "Zurück nach oben",
+        footer: "© 2025 Alle Rechte vorbehalten | Zeyad Samir Mohamed Hassan",
+        university: "Fakultät für Zahnmedizin - Sinai-Universität",
+        universityDate: "2023 - Gegenwart",
+        universityDesc: "Zahnmedizinstudent, der nach akademischer Exzellenz strebt.",
+        highSchool: "Al-Najah Sekundarschule für Jungen - Zagazig",
+        highSchoolDate: "2020 - 2023",
+        highSchoolDesc: "Sekundarschulbildung abgeschlossen.",
+        sekem: "Sekem Schule - Belbeis",
+        sekemDesc: "Kindergarten, Grundschule und Vorbereitungsphasen studiert.",
+        phoneLabel: "Telefonnummer:",
+        emailLabel: "E-Mail:",
+        addressLabel: "Adresse:"
+      }
+    };
+
+    function updateLanguage() {
+      const lang = translations[currentLang];
+      const isRTL = currentLang === 'ar';
+      document.dir = isRTL ? 'rtl' : 'ltr';
+      document.body.style.textAlign = isRTL ? 'right' : 'left';
+
+      document.querySelector('a[href="#about"]').textContent = lang.about;
+      document.querySelector('a[href="#education"]').textContent = lang.education;
+      document.querySelector('a[href="#contact"]').textContent = lang.contact;
+      document.querySelector('a[href="#video"]').textContent = lang.video;
+
+      document.getElementById('aboutTitle').textContent = lang.about;
+      document.getElementById('educationTitle').textContent = lang.education;
+      document.getElementById('contactTitle').textContent = lang.contact;
+      document.getElementById('videoTitle').textContent = lang.video;
+      document.getElementById('name').textContent = lang.name;
+      document.getElementById('dob').textContent = lang.dob;
+      document.getElementById('position').textContent = lang.position;
+      document.getElementById('location').innerHTML = `${lang.location} <a href="https://${isRTL ? 'ar' : 'en'}.wikipedia.org/wiki/${lang.zagazig}" target="_blank">${lang.zagazig}</a>, <a href="https://${isRTL ? 'ar' : 'en'}.wikipedia.org/wiki/${lang.sharqia}" target="_blank">${lang.sharqia}</a>, ${isRTL ? 'مصر' : 'Egypt'}`;
+      document.getElementById('additionalInfo').textContent = lang.additionalInfo;
+      document.getElementById('riyadh').textContent = lang.riyadh;
+      document.getElementById('flagsTitle').textContent = lang.flagsTitle;
+      document.getElementById('header-p').textContent = lang.headerP;
+      document.querySelector('.header-content button').textContent = lang.contactBtn;
+      document.getElementById('backToTop').title = lang.backToTop;
+      document.getElementById('footerText').textContent = lang.footer;
+      document.getElementById('university').innerHTML = `<a href="https://www.sinaiuniversity.net/" target="_blank">${lang.university}</a>`;
+      document.getElementById('universityDate').textContent = lang.universityDate;
+      document.getElementById('universityDesc').textContent = lang.universityDesc;
+      document.getElementById('highSchool').textContent = lang.highSchool;
+      document.getElementById('highSchoolDate').textContent = lang.highSchoolDate;
+      document.getElementById('highSchoolDesc').textContent = lang.highSchoolDesc;
+      document.getElementById('sekem').textContent = lang.sekem;
+      document.getElementById('sekemDesc').textContent = lang.sekemDesc;
+      document.getElementById('phoneLabel').textContent = lang.phoneLabel;
+      document.getElementById('emailLabel').textContent = lang.emailLabel;
+      document.getElementById('address').innerHTML = `<strong>${lang.addressLabel}</strong> <a href="https://${isRTL ? 'ar' : 'en'}.wikipedia.org/wiki/${lang.zagazig}" target="_blank">${lang.zagazig}</a>, <a href="https://${isRTL ? 'ar' : 'en'}.wikipedia.org/wiki/${lang.sharqia}" target="_blank">${lang.sharqia}</a>, ${isRTL ? 'مصر' : 'Egypt'}`;
+
+      clearTimeout(typeTimeout);
+      clearTimeout(eraseTimeout);
+      currentTextIndex = 0;
+      currentCharIndex = 0;
+      typingElement.textContent = "";
+      setTimeout(type, 500);
+    }
+
+    function changeLanguage() {
+      currentLang = document.getElementById('languageSelect').value;
+      document.body.setAttribute('lang', currentLang);
+      updateLanguage();
+    }
+
+    const menuIcon = document.getElementById('menuIcon');
+    const navLinks = document.getElementById('navLinks');
+    menuIcon.addEventListener('click', () => navLinks.classList.toggle('show'));
+
+    function scrollToSection(sectionId) {
+      document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+    }
+
+    const moreBtn = document.getElementById('moreBtn');
+    const moreInfo = document.getElementById('moreInfo');
+    moreBtn.addEventListener('click', () => {
+      moreInfo.classList.toggle('show');
+      moreBtn.textContent = moreInfo.classList.contains('show') ? translations[currentLang].hideBtn : translations[currentLang].moreBtn;
+    });
+
+    const backToTopBtn = document.getElementById('backToTop');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        backToTopBtn.style.display = 'block';
+      } else {
+        backToTopBtn.style.display = 'none';
+      }
+    });
+    backToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    const sections = document.querySelectorAll('.section');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in', 'animate__fadeInUp');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    sections.forEach(sec => observer.observe(sec));
+
+    window.addEventListener('scroll', () => {
+      const navbar = document.querySelector('.navbar');
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+  </script>
+</body>
+</html>
