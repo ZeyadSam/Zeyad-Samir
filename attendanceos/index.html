@@ -998,3 +998,158 @@ function exportPDF(){
 }
 function exportWeekPDF(week){
  try{
+  saveState({silent:true});const sessions=isExcludedWeek(week)?[]:state.sessions.filter(x=>x.week===week),t=calcStats(sessions),wk=String(week).padStart(2,'0');
+  const courseRows=isExcludedWeek(week)?'<tr><td colspan="8">Exam Week · no sessions are scheduled or included in attendance calculations.</td></tr>':courses.map(c=>{const x=calcStats(sessions.filter(s=>s.code===c.code));return `<tr><td>${escapeHtml(c.name)}</td><td>${x.present}</td><td>${x.absent}</td><td>${x.presentRecorded}</td><td>${x.absentRecorded}</td><td>${x.absentUnrecorded}</td><td>${x.absentMarkedPresent}</td><td>${x.held?x.rate.toFixed(1)+'%':'—'}</td></tr>`;}).join('');
+  const logRows=sessions.map(x=>`<tr><td>${escapeHtml(x.day)}</td><td>${escapeHtml(x.start)} – ${escapeHtml(x.end)}</td><td>${escapeHtml(courseMap[x.code].name)}</td><td>${escapeHtml(statusMeta[x.status].label)}</td><td>${escapeHtml(x.note||'—')}</td></tr>`).join('');
+  const content=reportHeader(`Weekly attendance report · ${isExcludedWeek(week)?'Exam Week':'Week '+wk}`,`<b>${escapeHtml(state.profile.name)}</b>${state.profile.studentId?' · Student ID: '+escapeHtml(state.profile.studentId):''} · Level 4 · Semester 1 · Generated ${new Date().toLocaleDateString('en-GB')}`)
+   +`<div class="print-summary"><div class="print-stat"><b>${t.scheduled}</b><span>Scheduled sessions</span></div><div class="print-stat"><b>${t.present}</b><span>Actual present</span></div><div class="print-stat"><b>${t.absent}</b><span>Actual missed</span></div><div class="print-stat"><b>${t.absentRecorded}</b><span>Officially recorded absent</span></div><div class="print-stat"><b>${t.held?t.rate.toFixed(1)+'%':'—'}</b><span>Official absence rate</span></div><div class="print-stat"><b>${t.cancelled}</b><span>Cancelled</span></div><div class="print-stat"><b>${t.recordedWeeks}/${t.scheduledWeeks}</b><span>Teaching weeks entered</span></div></div>`
+   +`<h2>Course summary · Week ${wk}</h2><table><thead><tr><th>Course</th><th>Actual Present</th><th>Actual Missed</th><th>Recorded Present</th><th>Recorded Absent*</th><th>Absent · not recorded</th><th>Absent · marked Present</th><th>Official rate</th></tr></thead><tbody>${courseRows}</tbody></table>`
+   +`<h2 class="new-page">All sessions · Week ${wk}</h2><table><thead><tr><th>Day</th><th>Time</th><th>Course</th><th>Status</th><th>Notes</th></tr></thead><tbody>${logRows||'<tr><td colspan="5">No sessions scheduled for this week.</td></tr>'}</tbody></table>`
+   +`<div class="report-note">* Official absence rate = “Absent · instructor recorded” ÷ attendance decisions actually entered × 100. Entire teaching weeks with no attendance entries are excluded; pending sessions are excluded even in partly completed weeks. Only “Absent · instructor recorded” increases the absence numerator. “Absent · not recorded” and “Absent · marked Present” remain visible but do not increase the official absence count. Pending and cancelled sessions are excluded. The maximum absence threshold is 25%.</div>`;
+  openPdfPrintWindow(`AttendanceOS_Week_${wk}`,content);
+ }catch(error){console.error('Weekly PDF export failed:',error);toast('Could not prepare this week’s PDF. Please try again.','error');}
+}
+
+function buildAIAnalysisPayload(){
+ const overall=totalStats();
+ const weekly=Array.from({length:WEEKS},(_,i)=>{const s=weekStats(i+1);return {week:i+1,excluded:isExcludedWeek(i+1),label:isExcludedWeek(i+1)?'Exam Week':'Teaching Week',scheduled:s.scheduled,present:s.present,absent:s.absent,instructorRecordedPresent:s.presentRecorded,instructorRecordedAbsent:s.absentRecorded,rateDenominator:s.rateDenominator,recordedWeeks:s.recordedWeeks,unrecordedWeeks:s.unrecordedWeeks,scheduledWeeks:s.scheduledWeeks,rateAbsences:s.rateAbsences,presentWithoutInstructorRecord:s.presentUnrecorded,absentWithoutInstructorRecord:s.absentUnrecorded,absentButMarkedPresent:s.absentMarkedPresent,cancelled:s.cancelled,pending:s.pending,held:s.held,absenceRatePct:s.held?Number(s.rate.toFixed(2)):null};});
+ const courseRows=courses.map(c=>{
+  const all=statsFor(c.code);
+  const perWeek=Array.from({length:WEEKS},(_,i)=>{const s=calcStats(state.sessions.filter(x=>x.code===c.code&&x.week===i+1));return {week:i+1,excluded:isExcludedWeek(i+1),present:s.present,absent:s.absent,instructorRecordedPresent:s.presentRecorded,instructorRecordedAbsent:s.absentRecorded,rateDenominator:s.rateDenominator,recordedWeeks:s.recordedWeeks,unrecordedWeeks:s.unrecordedWeeks,scheduledWeeks:s.scheduledWeeks,rateAbsences:s.rateAbsences,presentWithoutInstructorRecord:s.presentUnrecorded,absentWithoutInstructorRecord:s.absentUnrecorded,absentButMarkedPresent:s.absentMarkedPresent,cancelled:s.cancelled,pending:s.pending,held:s.held,absenceRatePct:s.held?Number(s.rate.toFixed(2)):null};});
+  return {title:c.name,credits:c.credits,scheduled:all.scheduled,present:all.present,absent:all.absent,instructorRecordedPresent:all.presentRecorded,instructorRecordedAbsent:all.absentRecorded,rateDenominator:all.rateDenominator,recordedWeeks:all.recordedWeeks,unrecordedWeeks:all.unrecordedWeeks,scheduledWeeks:all.scheduledWeeks,rateAbsences:all.rateAbsences,presentWithoutInstructorRecord:all.presentUnrecorded,absentWithoutInstructorRecord:all.absentUnrecorded,absentButMarkedPresent:all.absentMarkedPresent,cancelled:all.cancelled,pending:all.pending,held:all.held,absenceRatePct:all.held?Number(all.rate.toFixed(2)):null,maxAbsencesEstimate:all.maxAllowed,estimatedAbsencesRemaining:all.remaining,weekly:perWeek};
+ });
+ return {thresholdPercent:LIMIT,semesterWeeks:WEEKS,excludedWeeks:EXCLUDED_WEEKS,rateFormula:'instructorRecordedAbsent / enteredAttendanceDecisions * 100',rateNumerator:'Absent · instructor recorded only',rateDenominator:'Entered attendance decisions in teaching weeks with at least one attendance entry; pending sessions and entirely unentered weeks are excluded',unrecordedAndMismatchedStatusesExcludedFromNumerator:true,cancelledAndPendingExcluded:true,entirelyUnenteredWeeksExcludedFromRate:true,overall:{scheduled:overall.scheduled,present:overall.present,absent:overall.absent,instructorRecordedPresent:overall.presentRecorded,instructorRecordedAbsent:overall.absentRecorded,rateDenominator:overall.rateDenominator,recordedWeeks:overall.recordedWeeks,unrecordedWeeks:overall.unrecordedWeeks,scheduledWeeks:overall.scheduledWeeks,rateAbsences:overall.rateAbsences,presentWithoutInstructorRecord:overall.presentUnrecorded,absentWithoutInstructorRecord:overall.absentUnrecorded,absentButMarkedPresent:overall.absentMarkedPresent,cancelled:overall.cancelled,pending:overall.pending,held:overall.held,absenceRatePct:overall.held?Number(overall.rate.toFixed(2)):null},courses:courseRows,weekly};
+}
+function renderAIPreview(){
+ const t=totalStats(),rate=t.held?t.rate.toFixed(1)+'%':'—';
+ $('aiLocalMetrics').innerHTML=[
+  statCard('▦','blue','Sessions recorded',t.recorded,`${t.scheduled} scheduled · ${t.recordedWeeks} of ${t.scheduledWeeks} weeks entered · unentered weeks excluded from the rate`),
+  statCard('!','red','Actual missed sessions',t.absent,`${t.absentRecorded} officially recorded as Absent`),
+  statCard('◔','amber','Official absence rate',rate,'Only instructor-recorded Absent counts in the numerator'),
+  statCard('✓','green','Tracking completion',`${t.scheduled?Math.round(t.recorded/t.scheduled*100):0}%`,`${t.pending} sessions still unrecorded`)
+ ].join('');
+ const courseMetrics=courses.map(c=>({c,s:statsFor(c.code)})).filter(x=>x.s.held).sort((a,b)=>b.s.rate-a.s.rate);
+ const flagged=courseMetrics.filter(x=>x.s.rate>=20);
+ const top=courseMetrics.slice(0,3);
+ let htmlQuick='';
+ if(!t.held){htmlQuick='<div class="ai-quick-item neutral"><span class="signal-mark">i</span><div><strong>Not enough recorded attendance yet</strong><p>Mark sessions as Present or Absent to activate meaningful course and trend analysis. Pending sessions are not treated as absences.</p></div></div>';}
+ else {
+  if(flagged.length){htmlQuick+=`<div class="ai-quick-item ${flagged.some(x=>x.s.rate>LIMIT)?'critical':'caution'}"><span class="signal-mark">!</span><div><strong>${flagged.length} course${flagged.length===1?'':'s'} need attention</strong><p>${flagged.map(x=>`${escapeHtml(x.c.name)} (${x.s.rate.toFixed(1)}%)`).join(' · ')}. ${flagged.some(x=>x.s.rate>LIMIT)?'At least one course is above the configured 25% threshold.':'These courses are at or above 20%, so further absences could approach the limit.'}</p></div></div>`;}
+  else htmlQuick+='<div class="ai-quick-item positive"><span class="signal-mark">✓</span><div><strong>No recorded course is currently at 20% or higher</strong><p>Continue recording sessions consistently and review course-level changes each week.</p></div></div>';
+  htmlQuick+=`<div class="ai-quick-item neutral"><span class="signal-mark">↗</span><div><strong>Highest observed course rates</strong><p>${top.map(x=>`${escapeHtml(x.c.name)}: ${x.s.rate.toFixed(1)}% (${x.s.absentRecorded} officially recorded absence${x.s.absentRecorded===1?'':'s'} in ${x.s.held} sessions marked Present or Absent)`).join(' · ')||'No course-level rates available.'}</p></div></div>`;
+  htmlQuick+=`<div class="ai-quick-item neutral"><span class="signal-mark">▦</span><div><strong>Recording completeness</strong><p>${t.pending} of ${t.scheduled} scheduled sessions remain unrecorded. The current absence rate may change as records are completed.</p></div></div>`;
+ }
+ $('aiQuickReview').innerHTML=htmlQuick;
+}
+function setAIConnection(configured,model,message){
+ const badge=$('aiConnectionBadge'),dot=$('aiStatusDot'),modelLabel=$('aiModelLabel');
+ badge.textContent=message;dot.classList.toggle('online',!!configured);modelLabel.textContent=configured?`Connected model · ${model||'configured on local server'}`:'Local rules-based review remains available';
+ $('runAiAnalysis').disabled=!configured;$('runAiAnalysis').classList.toggle('disabled',!configured);
+}
+async function checkAIConnection(){
+ try{
+  const response=await fetch('/api/health',{cache:'no-store'});if(!response.ok)throw new Error('AI service health check failed');
+  const data=await response.json();
+  if(data.configured){setAIConnection(true,data.model,'AI service connected');$('aiSetupNote').classList.remove('show');}
+  else {setAIConnection(false,'','API key not configured');$('aiSetupNote').classList.add('show');}
+  return !!data.configured;
+ }catch(error){setAIConnection(false,'','Local AI service not running');$('aiSetupNote').classList.add('show');return false;}
+}
+function safeMarkdownToHtml(markdown){
+ const lines=String(markdown||'').split(/\r?\n/);let out='',listOpen=false;
+ const inline=s=>escapeHtml(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>');
+ for(const raw of lines){const line=raw.trim();if(!line){if(listOpen){out+='</ul>';listOpen=false;}continue;}
+  const heading=line.match(/^(#{1,3})\s+(.+)$/);if(heading){if(listOpen){out+='</ul>';listOpen=false;}out+=`<h${Math.min(3,heading[1].length+1)}>${inline(heading[2])}</h${Math.min(3,heading[1].length+1)}>`;continue;}
+  const bullet=line.match(/^[-*]\s+(.+)$/);if(bullet){if(!listOpen){out+='<ul>';listOpen=true;}out+=`<li>${inline(bullet[1])}</li>`;continue;}
+  if(listOpen){out+='</ul>';listOpen=false;}out+=`<p>${inline(line)}</p>`;
+ }
+ if(listOpen)out+='</ul>';return out||'<p>No analysis text was returned.</p>';
+}
+async function runAIAnalysis(){
+ const button=$('runAiAnalysis'),body=$('aiResultBody');
+ renderAIPreview();
+ const connected=await checkAIConnection();
+ if(!connected){body.innerHTML='<div class="ai-message-box warning"><strong>AI offline</strong><p>Local analytics are available.</p></div>';return;}
+ button.disabled=true;button.textContent='Analysing attendance…';if($('aiResultMeta')) $('aiResultMeta').textContent='Preparing review…';
+ body.innerHTML='<div class="ai-loading"><span class="ai-spinner"></span><strong>Reviewing attendance records</strong><p>Comparing course exposure, held sessions, and weekly patterns.</p></div>';
+ try{
+  const response=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({attendance:buildAIAnalysisPayload(),focus:$('aiFocus').value,question:$('aiQuestion').value.trim()})});
+  const data=await response.json().catch(()=>({error:'The local AI service returned an invalid response.'}));
+  if(!response.ok)throw new Error(data.error||`AI request failed (${response.status})`);
+  body.innerHTML=safeMarkdownToHtml(data.analysis||'No analysis text was returned.');
+  if($('aiResultMeta')) $('aiResultMeta').textContent=`${new Date().toLocaleString()} · ${data.model||'AI model'}`;
+ }catch(error){body.innerHTML=`<div class="ai-message-box warning"><strong>Analysis could not be completed.</strong><p>${escapeHtml(error.message||'Please check your AI connection and try again.')}</p></div>`;if($('aiResultMeta')) $('aiResultMeta').textContent='';}
+ finally{button.disabled=false;button.textContent='✦ Run AI analysis';}
+}
+
+// Populate course filter once.
+$('weekCourseFilter').innerHTML='<option value="all">All courses</option>'+courses.map(c=>`<option value="${c.code}">${escapeHtml(c.name)}</option>`).join('');
+$('mainNav').querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));$('mobileNav').querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+$('prevWeek').addEventListener('click',()=>selectWeek(selectedWeek-1));$('nextWeek').addEventListener('click',()=>selectWeek(selectedWeek+1));$('prevWeek').disabled=selectedWeek===1;$('nextWeek').disabled=selectedWeek===WEEKS;
+['weekCourseFilter','weekStatusFilter'].forEach(id=>$(id).addEventListener('change',renderWeek));$('weekSearch').addEventListener('input',renderWeek);$('courseSearch').addEventListener('input',renderCourses);
+$('markWeekPresent').addEventListener('click',()=>bulkMarkPending('present'));
+$('markWeekAbsent').addEventListener('click',()=>bulkMarkPending('absent'));
+$('undoLastBtn').addEventListener('click',undoLastAction);
+$('toggleDaysBtn').addEventListener('click',toggleAllDays);
+$('nextPendingBtn').addEventListener('click',jumpToNextPending);
+$('copyWeekSummaryBtn').addEventListener('click',copyWeekSummary);
+$('clearFiltersBtn').addEventListener('click',clearWeekFilters);
+document.querySelectorAll('[data-quick-filter]').forEach(button=>button.addEventListener('click',()=>{$('weekStatusFilter').value=button.dataset.quickFilter;renderWeek();}));
+$('clearWeekBtn').addEventListener('click',()=>{
+ if(isExcludedWeek(selectedWeek)){toast('Week 08 is an exam week; no attendance records can be cleared.','error');return;}
+ const items=state.sessions.filter(session=>session.week===selectedWeek&&!isExcludedWeek(session.week));
+ if(!items.some(item=>item.status!=='pending'||item.note)) {toast('This week is already clear.');return;}
+ if(!confirm(`Clear all statuses and notes for Week ${selectedWeek}? You can undo this action once.`))return;
+ recordUndo('clear week',items,true);
+ items.forEach(session=>{session.status='pending';session.note='';});saveState();renderAll();toast(`Week ${selectedWeek} has been cleared · Undo is available`);
+});
+$('saveProfile').addEventListener('click',()=>{state.profile.name=$('profileName').value.trim()||'Student';state.profile.studentId=$('profileId').value.trim();saveState();updateProfileHeader();toast('Profile saved');});
+['profileName','profileId'].forEach(id=>$(id).addEventListener('input',()=>{state.profile.name=$('profileName').value.trim()||'Student';state.profile.studentId=$('profileId').value.trim();saveState({silent:true});updateProfileHeader();}));
+$('settingsSaveNow').addEventListener('click',saveNowAndNotify);
+$('backupBtn').addEventListener('click',exportJSON);$('restoreBtn').addEventListener('click',()=>$('restoreFile').click());$('restoreFile').addEventListener('change',e=>{if(e.target.files[0])importJSON(e.target.files[0]);e.target.value='';});
+$('headerExcel').addEventListener('click',exportExcel);$('settingsExcel').addEventListener('click',exportExcel);$('headerPdf').addEventListener('click',exportPDF);$('settingsPdf').addEventListener('click',exportPDF);
+$('exportWeekExcel').addEventListener('click',exportWeekExcel);$('exportWeekPdf').addEventListener('click',()=>{saveState({silent:true});exportWeekPDF(selectedWeek);});
+$('saveNowBtn').addEventListener('click',saveNowAndNotify);
+$('runAiAnalysis').addEventListener('click',runAIAnalysis);$('refreshAiStatus').addEventListener('click',()=>checkAIConnection().then(ok=>toast(ok?'AI service is connected':'AI service is not available','')));
+$('resetDataBtn').addEventListener('click',()=>{if(!confirm('Reset all attendance statuses and notes for the 14 teaching weeks? Week 08 remains excluded. This cannot be undone.'))return;const profile=state.profile;state=freshState();state.profile=profile;undoAction=null;saveState();renderAll();toast('Attendance records have been reset');});
+
+// Keyboard support: Ctrl/Cmd+S saves, Ctrl/Cmd+Z undoes the latest register action,
+// and Alt+Left/Right moves between weeks when focus is not inside an editable control.
+document.addEventListener('keydown',event=>{
+ const key=String(event.key||'').toLowerCase();
+ const target=event.target;
+ const editing=!!(target&&(target.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(target.tagName)));
+ if((event.ctrlKey||event.metaKey)&&key==='k'){event.preventDefault();showPage('week');$('weekSearch').focus();$('weekSearch').select();return;}
+ if((event.ctrlKey||event.metaKey)&&key==='s'){
+  event.preventDefault();void saveNowAndNotify();return;
+ }
+ if((event.ctrlKey||event.metaKey)&&key==='z'&&!editing&&undoAction){
+  event.preventDefault();undoLastAction();return;
+ }
+ if(event.altKey&&!editing&&key==='arrowleft'){event.preventDefault();selectWeek(selectedWeek-1);}
+ if(event.altKey&&!editing&&key==='arrowright'){event.preventDefault();selectWeek(selectedWeek+1);}
+});
+
+// Responsive press feedback: a soft ripple follows the user's tap/click.
+document.addEventListener('pointerdown',event=>{
+  const target=event.target.closest('.btn,.week-chip,.mobile-nav button,.nav button');
+  if(!target || target.disabled) return;
+  const rect=target.getBoundingClientRect();
+  const size=Math.max(rect.width,rect.height)*1.45;
+  const ripple=document.createElement('span');
+  ripple.className='ripple';
+  ripple.style.width=size+'px';ripple.style.height=size+'px';
+  ripple.style.left=(event.clientX-rect.left-size/2)+'px';
+  ripple.style.top=(event.clientY-rect.top-size/2)+'px';
+  target.appendChild(ripple);
+  ripple.addEventListener('animationend',()=>ripple.remove(),{once:true});
+});
+
+initializeAttendanceStorage();
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveState({silent:true,immediate:true});});
+window.addEventListener('pagehide',()=>saveState({silent:true,immediate:true}));
+})();
+
+</script>
+</body>
+</html>

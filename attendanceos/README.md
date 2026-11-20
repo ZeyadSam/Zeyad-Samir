@@ -1,21 +1,27 @@
-# AttendanceOS — Sinai University
+# AttendanceOS — Sinai University Edition
 
-A standalone attendance tracker for Level 4 · Semester 1, Sinai University Faculty of Dentistry.
+A weekly attendance tracker for Level 4, Semester 1, Faculty of Dentistry.
 
-## Open the app
-Visit the `attendanceos/` directory in this repository or use the deployed GitHub Pages route after Pages deployment has completed.
+## Launch
 
-## Included
-- 15-week weekly register, with Week 08 excluded as the exam week.
-- Official absence rate counts only **Absent · instructor recorded**.
-- Weeks with no entered attendance are excluded from the rate.
-- Absent-not-recorded and absent-marked-present remain visible but do not increase the official absence numerator.
-- Local browser persistence and JSON backup/restore.
-- Weekly and semester PDF / Excel exports.
-- Sinai University logo embedded in the standalone app.
+Open [the AttendanceOS app](./index.html) in a modern browser.
 
-## Privacy
-Attendance records are stored in the browser on the user's device. They are not uploaded to this repository or a remote database.
+## Included behavior
 
-## GitHub Pages
-The workflow at `.github/workflows/deploy-pages.yml` publishes the existing profile homepage together with this app under `/attendanceos/`.
+- 15-week semester with Week 08 excluded as the examination week.
+- The final two Monday sessions are omitted.
+- Course names are shown without course codes.
+- Only **Absent · instructor recorded** contributes to the official absence-rate numerator.
+- Weeks with no attendance entries are excluded from the rate; pending sessions are excluded.
+- The maximum permitted official absence rate is 25%.
+- Local autosave, JSON backup/restore, weekly and semester PDF/XLSX exports.
+
+## Data and privacy
+
+Attendance records are stored locally in the browser. They are not uploaded to GitHub. Use the in-app JSON backup before changing browsers or clearing browser data.
+
+## Hosting
+
+This folder is kept separate from the repository's existing root website. When GitHub Pages is configured to publish the repository root from the default branch, the app is available at:
+
+`https://zeyadsam.github.io/Zeyad-Samir/attendanceos/`
